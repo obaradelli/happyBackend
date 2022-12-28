@@ -53,7 +53,7 @@ export default {
       about,
       instructions,
       opening_hours,
-      open_on_weekends,
+      open_on_weekends: open_on_weekends === "true" ? true : false,
       images,
     };
 
@@ -81,5 +81,6 @@ export default {
     await orphanagesRepository.save(orphanage);
 
     return response.status(201).json(orphanage);
+    // return response.json();
   },
 };
