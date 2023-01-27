@@ -1,4 +1,4 @@
-import Image from "../models/Image";
+import Image from "../Image";
 
 export default {
   render(image: Image) {

@@ -1,9 +1,20 @@
 import { Request, Response } from "express";
 import { getRepository } from "typeorm";
-import orphanagesView from "../views/orphanages_view";
+import orphanages_view from "../models/views/orphanages_view";
 import * as Yup from "yup";
 
 import Orphanage from "../models/Orphanage";
+
+import fs from "fs";
+
+export const deleteFile = async (originalname: string) => {
+  try {
+    await fs.promises.stat(originalname);
+  } catch {
+    return;
+  }
+  await fs.promises.unlink(originalname);
+};
 
 export default {
   async index(request: Request, response: Response) {
@@ -13,7 +24,7 @@ export default {
       relations: ["images"],
     });
 
-    return response.json(orphanagesView.renderMany(orphanages));
+    return response.json(orphanages_view.renderMany(orphanages));
   },
 
   async show(request: Request, response: Response) {
@@ -25,7 +36,25 @@ export default {
       relations: ["images"],
     });
 
-    return response.json(orphanagesView.render(orphanage));
+    return response.json(orphanages_view.render(orphanage));
+  },
+
+  async delete(request: Request, response: Response) {
+    const { id } = request.params;
+
+    const orphanagesRepository = getRepository(Orphanage);
+
+    const orphanage = await orphanagesRepository.findOneOrFail(id, {
+      relations: ["images"],
+    });
+
+    orphanage.images.forEach(({ path }) => {
+      deleteFile(`./uploads/${path}`);
+    });
+
+    await orphanagesRepository.delete({ id: Number(id) });
+
+    return response.json("Deleted");
   },
 
   async create(request: Request, response: Response) {
@@ -81,6 +110,5 @@ export default {
     await orphanagesRepository.save(orphanage);
 
     return response.status(201).json(orphanage);
-    // return response.json();
   },
 };

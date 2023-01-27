@@ -1,4 +1,4 @@
-import Orphanege from "../models/Orphanage";
+import Orphanege from "../../models/Orphanage";
 import imagesView from "./images_view";
 
 export default {
